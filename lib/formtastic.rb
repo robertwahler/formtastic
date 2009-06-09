@@ -1116,6 +1116,10 @@ module Formtastic #:nodoc:
     # the database.
     #
     def default_string_options(method) #:nodoc:
+      # short-circuit, see comment below
+      return {}
+      # TODO: Code below causes issues with integer editing, :maxlength is set to the byte size as
+      # stored in the DB, i.e. MySQL = 4.  Suggest using html_options rather than setting any defaults
       column = @object.column_for_attribute(method) if @object.respond_to?(:column_for_attribute)
 
       if column.nil? || column.limit.nil?
