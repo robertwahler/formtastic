@@ -68,6 +68,8 @@ module Formtastic #:nodoc:
     # * :numeric (a text field, like string) - default for :integer, :float and :decimal column types
     # * :country (a select menu of country names) - requires a country_select plugin to be installed
     # * :hidden (a hidden field) - creates a hidden field (added for compatibility)
+    # * :prepend_html - markup to add before the input
+    # * :append_html - markup to add after the input
     #
     # Example:
     #
@@ -77,6 +79,7 @@ module Formtastic #:nodoc:
     #       <%= form.input :manager_id, :as => :radio %>
     #       <%= form.input :hired_at, :as => :date, :label => "Date Hired" %>
     #       <%= form.input :phone, :required => false, :hint => "Eg: +1 555 1234" %>
+    #       <%= form.input :manager_id, :append_html => "#{f.check_box :_delete}  #{f.label :_delete, "Remove", :class => "inline"}" %>
     #     <% end %>
     #   <% end %>
     #
@@ -98,6 +101,9 @@ module Formtastic #:nodoc:
       list_item_content = @@inline_order.map do |type|
         send(:"inline_#{type}_for", method, options)
       end.compact.join("\n")
+
+      list_item_content += " #{options[:append_html]}" if options[:append_html]
+      list_item_content = "#{options[:prepend_html]} #{list_item_content}" if options[:prepend_html]
 
       return template.content_tag(:li, list_item_content, wrapper_html)
     end
