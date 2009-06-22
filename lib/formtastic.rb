@@ -49,6 +49,8 @@ module Formtastic #:nodoc:
     # * :hint - provide some text to hint or help the user provide the correct information for a field
     # * :input_html - provide options that will be passed down to the generated input
     # * :wrapper_html - provide options that will be passed down to the li wrapper
+    # * :prepend_html - markup to add before the input but inside the li wrapper
+    # * :append_html - markup to add after the input but inside the li wrapper
     # * :input_proxy - method used for actual input.  Allows shortcuts for fields that use attribute setters with
     #                  a different name. i.e. using Chronic for string based date inputs. 
     #
@@ -82,6 +84,7 @@ module Formtastic #:nodoc:
     #       <%= form.input :hired_at, :as => :date, :label => "Date Hired" %>
     #       <%= form.input :phone, :required => false, :hint => "Eg: +1 555 1234" %>
     #       <%= form.input :event_date, :input_proxy => :event_date_string %>
+    #       <%= form.input :manager_id, :append_html => "#{f.check_box :_delete}  #{f.label :_delete, "Remove", :class => "inline"}" %>
     #     <% end %>
     #   <% end %>
     #
@@ -109,6 +112,9 @@ module Formtastic #:nodoc:
       list_item_content = input_parts.map do |type|
         send(:"inline_#{type}_for", method, options)
       end.compact.join("\n")
+
+      list_item_content += " #{options[:append_html]}" if options[:append_html]
+      list_item_content = "#{options[:prepend_html]} #{list_item_content}" if options[:prepend_html]
 
       return template.content_tag(:li, list_item_content, wrapper_html)
     end
