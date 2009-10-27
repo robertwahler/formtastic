@@ -74,8 +74,6 @@ module Formtastic #:nodoc:
     # * :numeric (a text field, like string) - default for :integer, :float and :decimal column types
     # * :country (a select menu of country names) - requires a country_select plugin to be installed
     # * :hidden (a hidden field) - creates a hidden field (added for compatibility)
-    # * :prepend_html - markup to add before the input
-    # * :append_html - markup to add after the input
     #
     # Example:
     #
