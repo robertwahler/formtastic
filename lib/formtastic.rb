@@ -329,7 +329,12 @@ module Formtastic #:nodoc:
       element_class = ['commit', options.delete(:class)].compact.join(' ') # TODO: Add class reflecting on form action.
       accesskey = (options.delete(:accesskey) || @@default_commit_button_accesskey) unless button_html.has_key?(:accesskey)
       button_html = button_html.merge(:accesskey => accesskey) if accesskey  
-      template.content_tag(:li, self.submit(text, button_html), :class => element_class)
+
+      content = self.submit(text, button_html)
+      content += " #{options[:append_html]}" if options[:append_html]
+      content = "#{options[:prepend_html]} #{content}" if options[:prepend_html]
+
+      template.content_tag(:li, content, :class => element_class)
     end
 
     # A thin wrapper around #fields_for to set :builder => Formtastic::SemanticFormBuilder
