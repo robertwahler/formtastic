@@ -55,10 +55,6 @@ module Formtastic #:nodoc:
     # * :hint - provide some text to hint or help the user provide the correct information for a field
     # * :input_html - provide options that will be passed down to the generated input
     # * :wrapper_html - provide options that will be passed down to the li wrapper
-    # * :prepend_html - markup to add before the input
-    # * :append_html - markup to add after the input
-    # * :input_proxy - method used for actual input.  Allows shortcuts for fields that use attribute setters with
-    #                  a different name. i.e. using Chronic for string based date inputs. 
     #
     # Input Types:
     #
@@ -80,6 +76,8 @@ module Formtastic #:nodoc:
     # * :numeric (a text field, like string) - default for :integer, :float and :decimal column types
     # * :country (a select menu of country names) - requires a country_select plugin to be installed
     # * :hidden (a hidden field) - creates a hidden field (added for compatibility)
+    # * :prepend_html - markup to add before the input
+    # * :append_html - markup to add after the input
     #
     # Example:
     #
@@ -89,15 +87,13 @@ module Formtastic #:nodoc:
     #       <%= form.input :manager_id, :as => :radio %>
     #       <%= form.input :hired_at, :as => :date, :label => "Date Hired" %>
     #       <%= form.input :phone, :required => false, :hint => "Eg: +1 555 1234" %>
-    #       <%= form.input :event_date, :input_proxy => :event_date_string %>
     #       <%= form.input :manager_id, :append_html => "#{f.check_box :_delete}  #{f.label :_delete, "Remove", :class => "inline"}" %>
     #     <% end %>
     #   <% end %>
     #
     def input(method, options = {})
       options[:required] = method_required?(method) unless options.key?(:required)
-      as_method = options[:input_proxy] || method
-      options[:as]     ||= default_input_type(as_method)
+      options[:as]     ||= default_input_type(method)
 
       html_class = [ options[:as], (options[:required] ? :required : :optional) ]
       html_class << 'error' if @object && @object.respond_to?(:errors) && !@object.errors[method.to_sym].blank?
@@ -943,12 +939,11 @@ module Formtastic #:nodoc:
     #
     def inline_input_for(method, options)
       input_type = options.delete(:as)
-      input_method = options.delete(:input_proxy) || method
 
       if INPUT_MAPPINGS.key?(input_type)
-        input_simple(input_type,  input_method, options)
+        input_simple(input_type,  method, options)
       else
-        send("#{input_type}_input", input_method, options)
+        send("#{input_type}_input", method, options)
       end
     end
 
