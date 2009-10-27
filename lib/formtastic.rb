@@ -23,11 +23,10 @@ module Formtastic #:nodoc:
     @@file_methods = [ :file?, :public_filename ]
     @@priority_countries = ["Australia", "Canada", "United Kingdom", "United States"]
     @@i18n_lookups_by_default = false
-    @@default_commit_button_accesskey = nil 
 
     cattr_accessor :default_text_field_size, :all_fields_required_by_default, :include_blank_for_select_by_default,
                    :required_string, :optional_string, :inline_errors, :label_str_method, :collection_label_methods,
-                   :inline_order, :file_methods, :priority_countries, :i18n_lookups_by_default, :default_commit_button_accesskey 
+                   :inline_order, :file_methods, :priority_countries, :i18n_lookups_by_default
 
     I18N_SCOPES = [ '{{model}}.{{action}}.{{attribute}}',
                     '{{model}}.{{attribute}}',
@@ -323,8 +322,6 @@ module Formtastic #:nodoc:
       value = args.first.is_a?(String) ? args.shift : save_or_create_button_text
       options = args.shift || {}
       button_html = options.delete(:button_html) || {}
-      accesskey = (options.delete(:accesskey) || @@default_commit_button_accesskey) unless button_html.has_key?(:accesskey)
-      button_html = button_html.merge(:accesskey => accesskey) if accesskey
       content = self.submit(value, button_html)
       content += " #{options[:cancel]}" if options[:cancel]
       template.content_tag(:li, content, :class => "commit")
