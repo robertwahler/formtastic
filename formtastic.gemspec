@@ -5,12 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{formtastic}
-  s.version = "0.9.1"
+  s.version = "0.9.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Justin French"]
-  s.autorequire = %q{formtastic}
-  s.date = %q{2009-10-27}
+  s.date = %q{2009-12-04}
   s.description = %q{A Rails form builder plugin/gem with semantically rich and accessible markup}
   s.email = %q{justin@indent.com.au}
   s.extra_rdoc_files = [
@@ -30,43 +29,56 @@ Gem::Specification.new do |s|
      "generators/formtastic/templates/formtastic_changes.css",
      "generators/formtastic_stylesheets/formtastic_stylesheets_generator.rb",
      "lib/formtastic.rb",
+     "lib/formtastic/i18n.rb",
      "lib/locale/en.yml",
      "rails/init.rb",
      "spec/buttons_spec.rb",
      "spec/commit_button_spec.rb",
      "spec/custom_builder_spec.rb",
+     "spec/custom_macros.rb",
+     "spec/defaults_spec.rb",
      "spec/error_proc_spec.rb",
      "spec/errors_spec.rb",
      "spec/form_helper_spec.rb",
+     "spec/i18n_spec.rb",
      "spec/include_blank_spec.rb",
      "spec/input_spec.rb",
+     "spec/inputs/boolean_input_spec.rb",
+     "spec/inputs/check_boxes_input_spec.rb",
+     "spec/inputs/country_input_spec.rb",
+     "spec/inputs/date_input_spec.rb",
+     "spec/inputs/datetime_input_spec.rb",
+     "spec/inputs/file_input_spec.rb",
+     "spec/inputs/hidden_input_spec.rb",
+     "spec/inputs/numeric_input_spec.rb",
+     "spec/inputs/password_input_spec.rb",
+     "spec/inputs/radio_input_spec.rb",
+     "spec/inputs/select_input_spec.rb",
+     "spec/inputs/string_input_spec.rb",
+     "spec/inputs/text_input_spec.rb",
+     "spec/inputs/time_input_spec.rb",
+     "spec/inputs/time_zone_input_spec.rb",
      "spec/inputs_spec.rb",
      "spec/label_spec.rb",
      "spec/semantic_fields_for_spec.rb",
-     "spec/test_helper.rb"
+     "spec/spec.opts",
+     "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/justinfrench/formtastic/tree/master}
   s.post_install_message = %q{
   ========================================================================
-
   Thanks for installing Formtastic!
-    
-  You can now (optionally) run the generater to copy some stylesheets and
+  ------------------------------------------------------------------------
+  You can now (optionally) run the generator to copy some stylesheets and
   a config initializer into your application:
-  
     ./script/generate formtastic
-    
-  The following files will be added:
-  
-    RAILS_ROOT/public/stylesheets/formtastic.css
-    RAILS_ROOT/public/stylesheets/formtastic_changes.css
-    RAILS_ROOT/config/initializers/formtastic.rb
-  
-  Find out more and get involved:
 
+  To generate some semantic form markup for your exisiting models, just run:
+    ./script/generate form MODEL_NAME
+
+  Find out more and get involved:
     http://github.com/justinfrench/formtastic
     http://groups.google.com.au/group/formtastic
-  
   ========================================================================
   }
   s.rdoc_options = ["--charset=UTF-8"]
@@ -77,15 +89,33 @@ Gem::Specification.new do |s|
     "spec/buttons_spec.rb",
      "spec/commit_button_spec.rb",
      "spec/custom_builder_spec.rb",
+     "spec/custom_macros.rb",
+     "spec/defaults_spec.rb",
      "spec/error_proc_spec.rb",
      "spec/errors_spec.rb",
      "spec/form_helper_spec.rb",
+     "spec/i18n_spec.rb",
      "spec/include_blank_spec.rb",
      "spec/input_spec.rb",
+     "spec/inputs/boolean_input_spec.rb",
+     "spec/inputs/check_boxes_input_spec.rb",
+     "spec/inputs/country_input_spec.rb",
+     "spec/inputs/date_input_spec.rb",
+     "spec/inputs/datetime_input_spec.rb",
+     "spec/inputs/file_input_spec.rb",
+     "spec/inputs/hidden_input_spec.rb",
+     "spec/inputs/numeric_input_spec.rb",
+     "spec/inputs/password_input_spec.rb",
+     "spec/inputs/radio_input_spec.rb",
+     "spec/inputs/select_input_spec.rb",
+     "spec/inputs/string_input_spec.rb",
+     "spec/inputs/text_input_spec.rb",
+     "spec/inputs/time_input_spec.rb",
+     "spec/inputs/time_zone_input_spec.rb",
      "spec/inputs_spec.rb",
      "spec/label_spec.rb",
      "spec/semantic_fields_for_spec.rb",
-     "spec/test_helper.rb"
+     "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -93,8 +123,20 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<activesupport>, [">= 2.3.0"])
+      s.add_runtime_dependency(%q<actionpack>, [">= 2.3.0"])
+      s.add_development_dependency(%q<rspec-rails>, [">= 1.2.6"])
+      s.add_development_dependency(%q<rspec_tag_matchers>, [">= 1.0.0"])
     else
+      s.add_dependency(%q<activesupport>, [">= 2.3.0"])
+      s.add_dependency(%q<actionpack>, [">= 2.3.0"])
+      s.add_dependency(%q<rspec-rails>, [">= 1.2.6"])
+      s.add_dependency(%q<rspec_tag_matchers>, [">= 1.0.0"])
     end
   else
+    s.add_dependency(%q<activesupport>, [">= 2.3.0"])
+    s.add_dependency(%q<actionpack>, [">= 2.3.0"])
+    s.add_dependency(%q<rspec-rails>, [">= 1.2.6"])
+    s.add_dependency(%q<rspec_tag_matchers>, [">= 1.0.0"])
   end
 end

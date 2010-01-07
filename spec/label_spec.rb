@@ -1,5 +1,5 @@
 # coding: utf-8
-require File.dirname(__FILE__) + '/test_helper'
+require File.dirname(__FILE__) + '/spec_helper'
 
 describe 'SemanticFormBuilder#label' do
 
@@ -13,12 +13,6 @@ describe 'SemanticFormBuilder#label' do
   it 'should humanize the given attribute' do
     semantic_form_for(@new_post) do |builder|
       builder.label(:login).should have_tag('label', :with => /Login/)
-    end
-  end
-
-  it 'should be printed as span' do
-    semantic_form_for(@new_post) do |builder|
-      builder.label(:login, nil, { :required => true, :as_span => true }).should have_tag('span.label abbr')
     end
   end
 

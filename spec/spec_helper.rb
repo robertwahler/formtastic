@@ -15,18 +15,20 @@ end
 smart_require 'spec', 'spec', '>= 1.2.6'
 smart_require false, 'rspec-rails', '>= 1.2.6'
 smart_require 'hpricot', 'hpricot', '>= 0.6.1'
-smart_require 'rspec_hpricot_matchers', 'rspec_hpricot_matchers', '>= 1.0.0'
+smart_require 'rspec_tag_matchers', 'rspec_tag_matchers', '>= 1.0.0'
 smart_require 'active_support', 'activesupport', '>= 2.3.4'
 smart_require 'action_controller', 'actionpack', '>= 2.3.4'
 smart_require 'action_view', 'actionpack', '>= 2.3.4'
 
+require 'custom_macros'
+
 Spec::Runner.configure do |config|
-  config.include(RspecHpricotMatchers)
+  config.include(RspecTagMatchers)
+  config.include(CustomMacros)
 end
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/formtastic'))
 
-require 'formtastic'
 
 module FormtasticSpecHelper
   include ActionView::Helpers::FormHelper
@@ -59,7 +61,17 @@ module FormtasticSpecHelper
     def id
     end
   end
+  module ::Namespaced
+    class Post
+      def id
+      end
+    end
+  end
   class ::Author
+    def to_label
+    end
+  end
+  class ::Continent
   end
   
   def mock_everything
@@ -86,17 +98,30 @@ module FormtasticSpecHelper
     @bob.stub!(:class).and_return(::Author)
     @bob.stub!(:to_label).and_return('Bob Rock')
     @bob.stub!(:login).and_return('bob')
+    @bob.stub!(:created_at)
     @bob.stub!(:id).and_return(42)
     @bob.stub!(:posts).and_return([])
     @bob.stub!(:post_ids).and_return([])
     @bob.stub!(:new_record?).and_return(false)
     @bob.stub!(:errors).and_return(mock('errors', :[] => nil))
+    
+    @james = mock('user')
+     @james.stub!(:class).and_return(::Author)
+     @james.stub!(:to_label).and_return('James Shock')
+     @james.stub!(:login).and_return('james')
+     @james.stub!(:id).and_return(75)
+     @james.stub!(:posts).and_return([])
+     @james.stub!(:post_ids).and_return([])
+     @james.stub!(:new_record?).and_return(false)
+     @james.stub!(:errors).and_return(mock('errors', :[] => nil))
+    
 
     ::Author.stub!(:find).and_return([@fred, @bob])
     ::Author.stub!(:human_attribute_name).and_return { |column_name| column_name.humanize }
     ::Author.stub!(:human_name).and_return('::Author')
     ::Author.stub!(:reflect_on_validations_for).and_return([])
     ::Author.stub!(:reflect_on_association).and_return { |column_name| mock('reflection', :options => {}, :klass => Post, :macro => :has_many) if column_name == :posts }
+    ::Author.stub!(:content_columns).and_return([mock('column', :name => 'login'), mock('column', :name => 'created_at')])
 
     # Sometimes we need a mock @post object and some Authors for belongs_to
     @new_post = mock('post')
@@ -105,6 +130,8 @@ module FormtasticSpecHelper
     @new_post.stub!(:new_record?).and_return(true)
     @new_post.stub!(:errors).and_return(mock('errors', :[] => nil))
     @new_post.stub!(:author).and_return(nil)
+    @new_post.stub!(:main_post).and_return(nil)
+    @new_post.stub!(:sub_posts).and_return([]) #TODO should be a mock with methods for adding sub posts
 
     @freds_post = mock('post')
     @freds_post.stub!(:class).and_return(::Post)
@@ -126,20 +153,45 @@ module FormtasticSpecHelper
     ::Post.stub!(:reflect_on_association).and_return do |column_name|
       case column_name
       when :author, :author_status
-        mock('reflection', :options => {}, :klass => ::Author, :macro => :belongs_to)
+        mock = mock('reflection', :options => {}, :klass => ::Author, :macro => :belongs_to)
+        mock.stub!(:[]).with(:class_name).and_return("Author")
+        mock
       when :authors
         mock('reflection', :options => {}, :klass => ::Author, :macro => :has_and_belongs_to_many)
+      when :sub_posts
+        mock('reflection', :options => {}, :klass => ::Post, :macro => :has_many)
+      when :main_post
+        mock('reflection', :options => {}, :klass => ::Post, :macro => :belongs_to)
       end
+      
     end
     ::Post.stub!(:find).and_return([@freds_post])
+    ::Post.stub!(:content_columns).and_return([mock('column', :name => 'title'), mock('column', :name => 'body'), mock('column', :name => 'created_at')])
     
     @new_post.stub!(:title)
     @new_post.stub!(:body)
     @new_post.stub!(:published)
+    @new_post.stub!(:publish_at)
+    @new_post.stub!(:created_at)
+    @new_post.stub!(:secret)
+    @new_post.stub!(:time_zone)
+    @new_post.stub!(:category_name)
+    @new_post.stub!(:allow_comments)
     @new_post.stub!(:column_for_attribute).with(:meta_description).and_return(mock('column', :type => :string, :limit => 255))
-    @new_post.stub!(:column_for_attribute).with(:title).and_return(mock('column', :type => :string, :limit => 255))
+    @new_post.stub!(:column_for_attribute).with(:title).and_return(mock('column', :type => :string, :limit => 50))
     @new_post.stub!(:column_for_attribute).with(:body).and_return(mock('column', :type => :text))
     @new_post.stub!(:column_for_attribute).with(:published).and_return(mock('column', :type => :boolean))
+    @new_post.stub!(:column_for_attribute).with(:publish_at).and_return(mock('column', :type => :date))
+    @new_post.stub!(:column_for_attribute).with(:time_zone).and_return(mock('column', :type => :string))
+    @new_post.stub!(:column_for_attribute).with(:allow_comments).and_return(mock('column', :type => :boolean))
+    
+    @new_post.stub!(:author).and_return(@bob)
+    @new_post.stub!(:author_id).and_return(@bob.id)
+
+    @new_post.should_receive(:publish_at=).any_number_of_times
+    @new_post.should_receive(:title=).any_number_of_times
+    @new_post.stub!(:main_post_id).and_return(nil)
+        
   end
   
   def self.included(base)
@@ -154,6 +206,13 @@ module FormtasticSpecHelper
     end
   end
   
+  def with_config(config_method_name, value, &block)
+    old_value = ::Formtastic::SemanticFormBuilder.send(config_method_name)
+    ::Formtastic::SemanticFormBuilder.send(:"#{config_method_name}=", value)
+    yield
+    ::Formtastic::SemanticFormBuilder.send(:"#{config_method_name}=", old_value)
+  end
+  
 end
 
-::ActiveSupport::Deprecation.silenced = true
+::ActiveSupport::Deprecation.silenced = false

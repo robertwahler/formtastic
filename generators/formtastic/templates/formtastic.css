@@ -22,6 +22,12 @@ form.formtastic input, form.formtastic textarea, form.formtastic select { font-s
 form.formtastic legend { color:#000; }
 
 
+/* SEMANTIC ERRORS
+--------------------------------------------------------------------------------------------------*/
+form.formtastic ul.errors { color:#cc0000; margin:0.5em 0 1.5em 25%; list-style:square; }
+form.formtastic ul.errors li { padding:0; border:none; display:list-item; }
+
+
 /* FIELDSETS & LISTS
 --------------------------------------------------------------------------------------------------*/
 form.formtastic fieldset { }
@@ -64,6 +70,7 @@ form.formtastic fieldset ol li li label input { line-height:100%; vertical-align
 form.formtastic fieldset ol li fieldset { position:relative; }
 form.formtastic fieldset ol li fieldset legend { position:absolute; width:25%; padding-top:0.1em; }
 form.formtastic fieldset ol li fieldset legend span { position:absolute; }
+form.formtastic fieldset ol li fieldset legend.label label { position:absolute; }
 form.formtastic fieldset ol li fieldset ol { float:left; width:74%; margin:0; padding:0 0 0 25%; }
 form.formtastic fieldset ol li fieldset ol li { padding:0; border:0; }
 
