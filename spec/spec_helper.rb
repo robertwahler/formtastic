@@ -1,24 +1,18 @@
 # coding: utf-8
 require 'rubygems'
 
-def smart_require(lib_name, gem_name, gem_version = '>= 0.0.0')
-  begin
-    require lib_name if lib_name
-  rescue LoadError
-    if gem_name
-      gem gem_name, gem_version
-      require lib_name if lib_name
-    end
-  end
-end
+gem 'activesupport', '2.3.5'
+gem 'actionpack', '2.3.5'
+require 'active_support'
+require 'action_pack'
+require 'action_view'
+require 'action_controller'
 
-smart_require 'spec', 'spec', '>= 1.2.6'
-smart_require false, 'rspec-rails', '>= 1.2.6'
-smart_require 'hpricot', 'hpricot', '>= 0.6.1'
-smart_require 'rspec_tag_matchers', 'rspec_tag_matchers', '>= 1.0.0'
-smart_require 'active_support', 'activesupport', '>= 2.3.4'
-smart_require 'action_controller', 'actionpack', '>= 2.3.4'
-smart_require 'action_view', 'actionpack', '>= 2.3.4'
+gem 'rspec', '>= 1.2.6'
+gem 'rspec-rails', '>= 1.2.6'
+gem 'hpricot', '>= 0.6.1'
+gem 'rspec_tag_matchers', '>= 1.0.0'
+require 'rspec_tag_matchers'
 
 require 'custom_macros'
 
@@ -28,6 +22,7 @@ Spec::Runner.configure do |config|
 end
 
 require File.expand_path(File.join(File.dirname(__FILE__), '../lib/formtastic'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/formtastic/layout_helper'))
 
 
 module FormtasticSpecHelper
@@ -41,6 +36,7 @@ module FormtasticSpecHelper
   include ActionView::Helpers::RecordIdentificationHelper
   include ActionView::Helpers::DateHelper
   include ActionView::Helpers::CaptureHelper
+  include ActionView::Helpers::AssetTagHelper
   include ActiveSupport
   include ActionController::PolymorphicRoutes
   
@@ -130,6 +126,7 @@ module FormtasticSpecHelper
     @new_post.stub!(:new_record?).and_return(true)
     @new_post.stub!(:errors).and_return(mock('errors', :[] => nil))
     @new_post.stub!(:author).and_return(nil)
+		@new_post.stub!(:reviewer).and_return(nil)
     @new_post.stub!(:main_post).and_return(nil)
     @new_post.stub!(:sub_posts).and_return([]) #TODO should be a mock with methods for adding sub posts
 
@@ -150,10 +147,15 @@ module FormtasticSpecHelper
     ::Post.stub!(:human_name).and_return('Post')
     ::Post.stub!(:reflect_on_all_validations).and_return([])
     ::Post.stub!(:reflect_on_validations_for).and_return([])
+    ::Post.stub!(:reflections).and_return({})
     ::Post.stub!(:reflect_on_association).and_return do |column_name|
       case column_name
       when :author, :author_status
         mock = mock('reflection', :options => {}, :klass => ::Author, :macro => :belongs_to)
+        mock.stub!(:[]).with(:class_name).and_return("Author")
+        mock
+			when :reviewer
+				mock = mock('reflection', :options => {:class_name => 'Author'}, :klass => ::Author, :macro => :belongs_to)
         mock.stub!(:[]).with(:class_name).and_return("Author")
         mock
       when :authors
@@ -177,6 +179,9 @@ module FormtasticSpecHelper
     @new_post.stub!(:time_zone)
     @new_post.stub!(:category_name)
     @new_post.stub!(:allow_comments)
+    @new_post.stub!(:country)
+    @new_post.stub!(:country_subdivision)
+    @new_post.stub!(:country_code)
     @new_post.stub!(:column_for_attribute).with(:meta_description).and_return(mock('column', :type => :string, :limit => 255))
     @new_post.stub!(:column_for_attribute).with(:title).and_return(mock('column', :type => :string, :limit => 50))
     @new_post.stub!(:column_for_attribute).with(:body).and_return(mock('column', :type => :text))
@@ -184,9 +189,16 @@ module FormtasticSpecHelper
     @new_post.stub!(:column_for_attribute).with(:publish_at).and_return(mock('column', :type => :date))
     @new_post.stub!(:column_for_attribute).with(:time_zone).and_return(mock('column', :type => :string))
     @new_post.stub!(:column_for_attribute).with(:allow_comments).and_return(mock('column', :type => :boolean))
+    @new_post.stub!(:column_for_attribute).with(:author).and_return(mock('column', :type => :integer))
+    @new_post.stub!(:column_for_attribute).with(:country).and_return(mock('column', :type => :string, :limit => 255))
+    @new_post.stub!(:column_for_attribute).with(:country_subdivision).and_return(mock('column', :type => :string, :limit => 255))
+    @new_post.stub!(:column_for_attribute).with(:country_code).and_return(mock('column', :type => :string, :limit => 255))
     
     @new_post.stub!(:author).and_return(@bob)
     @new_post.stub!(:author_id).and_return(@bob.id)
+
+		@new_post.stub!(:reviewer).and_return(@fred)
+		@new_post.stub!(:reviewer_id).and_return(@fred.id)
 
     @new_post.should_receive(:publish_at=).any_number_of_times
     @new_post.should_receive(:title=).any_number_of_times
@@ -211,6 +223,12 @@ module FormtasticSpecHelper
     ::Formtastic::SemanticFormBuilder.send(:"#{config_method_name}=", value)
     yield
     ::Formtastic::SemanticFormBuilder.send(:"#{config_method_name}=", old_value)
+  end
+  
+  def with_deprecation_silenced(&block)
+    ::ActiveSupport::Deprecation.silenced = true
+    yield
+    ::ActiveSupport::Deprecation.silenced = false
   end
   
 end

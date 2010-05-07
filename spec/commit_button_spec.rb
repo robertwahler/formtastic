@@ -121,9 +121,6 @@ describe 'SemanticFormBuilder#commit_button' do
   end
 
   describe 'label' do
-    before do
-      ::Post.stub!(:human_name).and_return('Post')
-    end
 
     # No object
     describe 'when used without object' do
@@ -351,7 +348,7 @@ describe 'SemanticFormBuilder#commit_button' do
   describe 'when the model is two words' do
     before do
       output_buffer = ''
-      class ::UserPost; def id; end; end
+      class ::UserPost; def id; end; def self.human_name; "Userpost"; end; end # Rails does crappy human_name
       @new_user_post = ::UserPost.new
       
       @new_user_post.stub!(:new_record?).and_return(true)
@@ -365,5 +362,5 @@ describe 'SemanticFormBuilder#commit_button' do
     end
     
   end
-  
+    
 end

@@ -103,11 +103,14 @@ Optionally, run @./script/generate formtastic@ to copy the following files into 
 * @public/stylesheets/formtastic.css@
 * @public/stylesheets/formtastic_changes.css@
 
-A proof-of-concept stylesheet is provided which you can include in your layout. Customization is best achieved by overriding these styles in an additional stylesheet so that the Formtastic styles can be updated without clobbering your changes. If you want to use these stylesheets, add both to your layout:
+A proof-of-concept stylesheet is provided which you can include in your layout. Customization is best achieved by overriding these styles in an additional stylesheet so that the Formtastic styles can be updated without clobbering your changes. If you want to use these stylesheets, add both to your layout with this helper:
 
 <pre>
-  <%= stylesheet_link_tag "formtastic" %>
-  <%= stylesheet_link_tag "formtastic_changes" %>
+  <head>
+    ...
+    <%= formtastic_stylesheet_link_tag %>
+    ...
+  </head>
 </pre>
 
 h2. Usage
@@ -170,7 +173,7 @@ If you want to customize the label text, or render some hint text below the fiel
   <% end %>
 </pre>
 
-Nested forms (Rails 2.3) are also supported. You can do it in the Rails way:
+Nested forms (Rails 2.3) are also supported (don't forget your models need to be setup correctly with accepts_nested_attributes_for – search the Rails docs). You can do it in the Rails way:
 
 <pre>
   <% semantic_form_for @post do |form| %>
@@ -203,7 +206,7 @@ When working in has many association, you can even supply @"%i"@ in your fieldse
 </pre>
 
 
-Customize HTML attributes for any input using the @:input_html@ option. Typically his is used to disable the input, change the size of a text field, change the rows in a textarea, or even to add a special class to an input to attach special behavior like "autogrow":http://plugins.jquery.com/project/autogrow textareas:
+Customize HTML attributes for any input using the @:input_html@ option. Typically this is used to disable the input, change the size of a text field, change the rows in a textarea, or even to add a special class to an input to attach special behavior like "autogrow":http://plugins.jquery.com/project/autogrow textareas:
 
 <pre>
   <% semantic_form_for @post do |form| %>
@@ -236,6 +239,23 @@ Customize the HTML attributes for the @<li>@ wrapper around every input with the
   <% end %>
 </pre>
 
+Many inputs provide a collection of options to choose from (like @:select@, @:radio@, @:check_boxes@, @:boolean@). In many cases, Formtastic can find choices through the model associations, but if you want to use your own set of choices, the @:collection@ option is what you want.  You can pass in an Array of objects, an array of Strings, a Hash... Throw almost anything at it! Examples:
+
+<pre>
+  f.input :authors, :as => :check_boxes, :collection => User.find(:all, :order => "last_name ASC")
+  f.input :authors, :as => :check_boxes, :collection => current_user.company.users.active
+  f.input :authors, :as => :check_boxes, :collection => [@justin, @kate]
+  f.input :authors, :as => :check_boxes, :collection => ["Justin", "Kate", "Amelia", "Gus", "Meg"]
+  f.input :author,  :as => :select,      :collection => Author.find(:all)
+  f.input :author,  :as => :select,      :collection => { @justin.name => @justin.id, @kate.name => @kate.id }
+  f.input :author,  :as => :select,      :collection => ["Justin", "Kate", "Amelia", "Gus", "Meg"]
+  f.input :author,  :as => :radio,       :collection => User.find(:all)
+  f.input :author,  :as => :radio,       :collection => [@justin, @kate]
+  f.input :author,  :as => :radio,       :collection => { @justin.name => @justin.id, @kate.name => @kate.id }
+  f.input :author,  :as => :radio,       :collection => ["Justin", "Kate", "Amelia", "Gus", "Meg"]
+  f.input :admin,   :as => :radio,       :collection => ["Yes!", "No"]
+</pre>
+
 
 h2. The Available Inputs
 
@@ -257,7 +277,8 @@ The Formtastic input types:
 * @:country@ - a select menu of country names. Default for column types: :string with name @"country"@ - requires a *country_select* plugin to be installed.
 * @:hidden@ - a hidden field. Creates a hidden field (added for compatibility).
 
-The documentation is pretty good for each of these (what it does, what the output is, what the options are, etc.) so go check it out.
+The comments in the code are pretty good for each of these (what it does, what the output is, what the options are, etc.) so go check it out.
+
 
 h2. Delegation for label lookups
 
