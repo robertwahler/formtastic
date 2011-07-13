@@ -62,6 +62,10 @@ module Formtastic #:nodoc:
     # * :hint - provide some text to hint or help the user provide the correct information for a field
     # * :input_html - provide options that will be passed down to the generated input
     # * :wrapper_html - provide options that will be passed down to the li wrapper
+    # * :prepend_html - markup to add before the input but inside the li wrapper
+    # * :append_html - markup to add after the input but inside the li wrapper
+    # * :input_proxy - method used for actual input.  Allows shortcuts for fields that use attribute setters with
+    #                  a different name. i.e. using Chronic for string based date inputs. 
     #
     # Input Types:
     #
@@ -104,6 +108,8 @@ module Formtastic #:nodoc:
     #       <%= form.input :phone, :required => false, :hint => "Eg: +1 555 1234" %>
     #       <%= form.input :email %>
     #       <%= form.input :website, :as => :url, :hint => "You may wish to omit the http://" %>
+    #       <%= form.input :event_date, :input_proxy => :event_date_string %>
+    #       <%= form.input :manager_id, :append_html => "#{f.check_box :_delete}  #{f.label :_delete, "Remove", :class => "inline"}" %>
     #     <% end %>
     #   <% end %>
     #
@@ -111,7 +117,8 @@ module Formtastic #:nodoc:
       options = options.dup # Allow options to be shared without being tainted by Formtastic
       
       options[:required] = method_required?(method) unless options.key?(:required)
-      options[:as]     ||= default_input_type(method, options)
+      as_method = options[:input_proxy] || method
+      options[:as]     ||= default_input_type(as_method, options)
 
       html_class = [ options[:as], (options[:required] ? :required : :optional) ]
       html_class << 'error' if has_errors?(method, options)
@@ -131,6 +138,9 @@ module Formtastic #:nodoc:
       list_item_content = input_parts.map do |type|
         send(:"inline_#{type}_for", method, options)
       end.compact.join("\n")
+
+      list_item_content += " #{options[:append_html]}" if options[:append_html]
+      list_item_content = "#{options[:prepend_html]} #{list_item_content}" if options[:prepend_html]
 
       return template.content_tag(:li, Formtastic::Util.html_safe(list_item_content), wrapper_html)
     end
@@ -377,7 +387,12 @@ module Formtastic #:nodoc:
 
       accesskey = (options.delete(:accesskey) || default_commit_button_accesskey) unless button_html.has_key?(:accesskey)
       button_html = button_html.merge(:accesskey => accesskey) if accesskey
-      template.content_tag(:li, Formtastic::Util.html_safe(submit(text, button_html)), wrapper_html)
+
+      content = submit(text, button_html)
+      content += " #{options[:append_html]}" if options[:append_html]
+      content = "#{options[:prepend_html]} #{content}" if options[:prepend_html]
+
+      template.content_tag(:li, Formtastic::Util.html_safe(content), wrapper_html)
     end
 
     # A thin wrapper around #fields_for to set :builder => Formtastic::SemanticFormBuilder
@@ -1277,7 +1292,8 @@ module Formtastic #:nodoc:
 
       # Generates an input for the given method using the type supplied with :as.
       def inline_input_for(method, options)
-        send(:"#{options.delete(:as)}_input", method, options)
+        input_method = options.delete(:input_proxy) || method
+        send(:"#{options.delete(:as)}_input", input_method, options)
       end
 
       # Generates hints for the given method using the text supplied in :hint.
