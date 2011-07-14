@@ -139,8 +139,8 @@ module Formtastic #:nodoc:
         send(:"inline_#{type}_for", method, options)
       end.compact.join("\n")
 
-      list_item_content += " #{options[:append_html]}" if options[:append_html]
-      list_item_content = "#{options[:prepend_html]} #{list_item_content}" if options[:prepend_html]
+      list_item_content += " #{options[:append_html]}".html_safe if options[:append_html]
+      list_item_content = "#{options[:prepend_html]} #{list_item_content}".html_safe if options[:prepend_html]
 
       return template.content_tag(:li, Formtastic::Util.html_safe(list_item_content), wrapper_html)
     end
@@ -389,8 +389,8 @@ module Formtastic #:nodoc:
       button_html = button_html.merge(:accesskey => accesskey) if accesskey
 
       content = submit(text, button_html)
-      content += " #{options[:append_html]}" if options[:append_html]
-      content = "#{options[:prepend_html]} #{content}" if options[:prepend_html]
+      content += " #{options[:append_html]}".html_safe if options[:append_html]
+      content = "#{options[:prepend_html]} #{content}".html_safe if options[:prepend_html]
 
       template.content_tag(:li, Formtastic::Util.html_safe(content), wrapper_html)
     end
